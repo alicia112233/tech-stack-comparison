@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Server, Database, Globe, CheckCircle, XCircle } from 'lucide-react';
+import { Server, Database, Globe, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 
 interface Service {
     name: string;
@@ -11,6 +11,7 @@ interface Service {
         available: boolean;
         name?: string;
         features: string[];
+        downsides?: string[];
     };
     paidTier: {
         name?: string;
@@ -120,6 +121,12 @@ const ComparisonChart = () => {
                         'Preview deployments',
                         'Personal projects only',
                         'Community support'
+                    ],
+                    downsides: [
+                        'Personal/non-commercial use only',
+                        'Limited team collaboration',
+                        'No password protection',
+                        'Community support only (slower response)'
                     ]
                 },
                 paidTier: {
@@ -152,12 +159,19 @@ const ComparisonChart = () => {
                         'Serverless functions',
                         'Deploy previews',
                         'Community support'
+                    ],
+                    downsides: [
+                        'Limited build minutes (300/month)',
+                        'Limited form submissions (100/month)',
+                        'No background functions',
+                        'No analytics or split testing',
+                        'Community support only'
                     ]
                 },
                 paidTier: {
                     name: 'Pro',
                     features: [
-                        'Everything in Free',
+                        'Everything in Free tier',
                         '1TB bandwidth/month',
                         '25,000 build minutes/month',
                         'Background functions',
@@ -185,6 +199,13 @@ const ComparisonChart = () => {
                         '1 GB disk per service',
                         'Shared CPU',
                         'Community support'
+                    ],
+                    downsides: [
+                        'Only $5 credit (runs out quickly)',
+                        'Limited RAM (512 MB)',
+                        'Limited disk space (1 GB)',
+                        'Shared CPU (slower performance)',
+                        'Need credit card for trial'
                     ]
                 },
                 paidTier: {
@@ -200,7 +221,7 @@ const ComparisonChart = () => {
                         'Priority support'
                     ]
                 },
-                url: 'railway.com'
+                url: 'railway.com/pricing'
             },
             {
                 name: 'Render',
@@ -218,12 +239,19 @@ const ComparisonChart = () => {
                         '750 hours/month (instances)',
                         'Automatic SSL',
                         'Community support'
+                    ],
+                    downsides: [
+                        'Free instances spin down after inactivity',
+                        'Cold starts (slow initial response)',
+                        'Limited to 750 hours/month',
+                        'No background workers or cron jobs',
+                        'Community support only'
                     ]
                 },
                 paidTier: {
                     name: 'Starter',
                     features: [
-                        'Everything in Free',
+                        'Everything in Free tier',
                         'Always-on instances',
                         'Background workers',
                         'Cron jobs',
@@ -246,6 +274,7 @@ const ComparisonChart = () => {
                     available: true,
                     name: 'Free',
                     features: [
+                        'PostgreSQL database',
                         '500 MB database storage',
                         '1 GB file storage',
                         '2 GB bandwidth',
@@ -253,6 +282,13 @@ const ComparisonChart = () => {
                         'Unlimited API requests',
                         'Up to 500MB data transfer',
                         'Community support'
+                    ],
+                    downsides: [
+                        'Limited storage (500 MB database)',
+                        'No automatic backups',
+                        'Projects pause after 1 week inactivity',
+                        'Limited to 2 organizations',
+                        'Community support only'
                     ]
                 },
                 paidTier: {
@@ -268,7 +304,7 @@ const ComparisonChart = () => {
                         'Email support'
                     ]
                 },
-                url: 'supabase.com'
+                url: 'supabase.com/pricing'
             },
             {
                 name: 'PlanetScale',
@@ -280,12 +316,20 @@ const ComparisonChart = () => {
                     available: true,
                     name: 'Hobby',
                     features: [
+                        'MySQL database (serverless)',
                         '5 GB storage',
                         '1 billion row reads/month',
                         '10 million row writes/month',
                         '1 production branch',
                         '1 development branch',
                         'Community support'
+                    ],
+                    downsides: [
+                        'Limited to 1 database',
+                        'Limited branches (1 prod + 1 dev)',
+                        'No high availability',
+                        'No query insights',
+                        'Community support only'
                     ]
                 },
                 paidTier: {
@@ -300,7 +344,7 @@ const ComparisonChart = () => {
                         'Priority support'
                     ]
                 },
-                url: 'planetscale.com'
+                url: 'planetscale.com/pricing'
             },
             {
                 name: 'AWS RDS',
@@ -318,6 +362,13 @@ const ComparisonChart = () => {
                         'MySQL, PostgreSQL, MariaDB',
                         'Single-AZ deployment',
                         'Standard support'
+                    ],
+                    downsides: [
+                        'Only 12 months free (then charged)',
+                        'Very limited instance size (t2.micro)',
+                        'Single-AZ only (no high availability)',
+                        'Complex pricing after free tier',
+                        'Requires AWS account & credit card'
                     ]
                 },
                 paidTier: {
@@ -333,7 +384,7 @@ const ComparisonChart = () => {
                         'Enterprise support available'
                     ]
                 },
-                url: 'aws.amazon.com/rds'
+                url: 'aws.amazon.com/rds/pricing/'
             },
             {
                 name: 'Railway DB',
@@ -351,6 +402,13 @@ const ComparisonChart = () => {
                         '1 GB disk',
                         'Integrated with hosting',
                         'Community support'
+                    ],
+                    downsides: [
+                        'Only $5 credit (runs out quickly)',
+                        'Very limited RAM (512 MB)',
+                        'Limited disk space (1 GB)',
+                        'No automatic backups on free tier',
+                        'Need credit card for trial'
                     ]
                 },
                 paidTier: {
@@ -365,7 +423,7 @@ const ComparisonChart = () => {
                         'Priority support'
                     ]
                 },
-                url: 'railway.com'
+                url: 'railway.com/pricing'
             }
         ]
     };
@@ -421,7 +479,16 @@ const ComparisonChart = () => {
                                                 {service.type}
                                             </span>
                                         </div>
-                                        <p className="text-sm text-gray-500">{service.url}</p>
+                                        <p className="text-sm text-gray-500">
+                                            <a 
+                                                href={`https://${service.url}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 hover:underline"
+                                            >
+                                                {service.url}
+                                            </a>
+                                        </p>
                                     </div>
                                 </div>
 
@@ -448,6 +515,20 @@ const ComparisonChart = () => {
                                                         <span className="text-sm text-gray-700">{feature}</span>
                                                     </div>
                                                 ))}
+                                                
+                                                {service.freeTier.downsides && service.freeTier.downsides.length > 0 && (
+                                                    <>
+                                                        <div className="border-t border-gray-300 my-3 pt-3">
+                                                            <p className="text-xs font-semibold text-orange-700 mb-2">⚠️ Limitations:</p>
+                                                        </div>
+                                                        {service.freeTier.downsides.map((downside: string, dIdx: number) => (
+                                                            <div key={dIdx} className="flex items-start gap-2">
+                                                                <AlertTriangle className="text-orange-500 mt-0.5 flex-shrink-0" size={16} />
+                                                                <span className="text-sm text-gray-600">{downside}</span>
+                                                            </div>
+                                                        ))}
+                                                    </>
+                                                )}
                                             </div>
                                         ) : (
                                             <div className="flex items-center gap-2 text-gray-500">
