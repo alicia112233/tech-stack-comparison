@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Server, Database, Globe, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Server, Database, Globe, CheckCircle, XCircle, AlertTriangle, Archive } from 'lucide-react';
 
 interface Service {
     name: string;
@@ -29,12 +29,26 @@ const ComparisonChart = () => {
     const convertPrice = (price: string, fromCurrency: string = 'USD'): string => {
         if (!price) return 'N/A';
         if (fromCurrency === currency) return price;
-        if (currency === 'SGD' && fromCurrency === 'USD') {
-            return `$${(parseFloat(price.replace('$', '')) * exchangeRate).toFixed(2)}`;
+        
+        // Handle per GB pricing (e.g., "$0.004/GB/month")
+        const perGBMatch = price.match(/\$?([\d.]+)(.+)/);
+        if (perGBMatch) {
+            const amount = parseFloat(perGBMatch[1]);
+            const suffix = perGBMatch[2]; // e.g., "/GB/month", "/month", "/year"
+            
+            if (currency === 'SGD' && fromCurrency === 'USD') {
+                const converted = (amount * exchangeRate).toFixed(4);
+                // Remove trailing zeros for cleaner display
+                const cleanPrice = parseFloat(converted).toString();
+                return `$${cleanPrice}${suffix}`;
+            }
+            if (currency === 'USD' && fromCurrency === 'SGD') {
+                const converted = (amount / exchangeRate).toFixed(4);
+                const cleanPrice = parseFloat(converted).toString();
+                return `$${cleanPrice}${suffix}`;
+            }
         }
-        if (currency === 'USD' && fromCurrency === 'SGD') {
-            return `$${(parseFloat(price.replace('$', '')) / exchangeRate).toFixed(2)}`;
-        }
+        
         return price;
     };
 
@@ -425,11 +439,259 @@ const ComparisonChart = () => {
                 },
                 url: 'railway.com/pricing'
             }
+        ],
+        archival: [
+            {
+                name: 'Backblaze B2',
+                type: 'Archival Storage',
+                hasFree: true,
+                starter: '$0.006/GB/month',
+                currency: 'USD',
+                freeTier: {
+                    available: true,
+                    name: 'Free Tier',
+                    features: [
+                        '10 GB storage (forever free)',
+                        '1 GB daily download',
+                        'Unlimited upload bandwidth',
+                        'S3 compatible API',
+                        'No egress fees (1st GB/day)',
+                        'No minimum storage duration'
+                    ],
+                    downsides: [
+                        'Limited to 10 GB free storage',
+                        'Only 1 GB/day free download',
+                        'No CDN included (partner with Cloudflare)',
+                        'Less features than big cloud providers',
+                        'Smaller geographic presence'
+                    ]
+                },
+                paidTier: {
+                    name: 'B2 Cloud Storage',
+                    features: [
+                        '$0.006/GB/month storage',
+                        '$0.01/GB download (after free tier)',
+                        'Free upload bandwidth',
+                        'S3 compatible',
+                        'No API call fees',
+                        'Object lock',
+                        'Free Cloudflare CDN partnership',
+                        'Simple, transparent pricing'
+                    ]
+                },
+                url: 'backblaze.com/cloud-storage/pricing'
+            },
+            {
+                name: 'AWS Glacier',
+                type: 'Archival Storage',
+                hasFree: true,
+                starter: '$0.004/GB/month',
+                currency: 'USD',
+                freeTier: {
+                    available: true,
+                    name: 'Free Tier (12 months)',
+                    features: [
+                        '10 GB retrieval/month',
+                        'PUT/COPY requests free',
+                        'Standard retrieval included',
+                        'Lifecycle policies',
+                        'S3 integration',
+                        'First 12 months only'
+                    ],
+                    downsides: [
+                        'Only 12 months free (then charged)',
+                        'Retrieval times: 3-5 hours (standard)',
+                        'Retrieval fees apply ($0.01/GB)',
+                        'Minimum 90-day storage commitment',
+                        'Complex pricing structure',
+                        'Requires AWS account & credit card'
+                    ]
+                },
+                paidTier: {
+                    name: 'Glacier Flexible/Deep Archive',
+                    features: [
+                        'Flexible: $0.004/GB/month',
+                        'Deep Archive: $0.00099/GB/month',
+                        'Bulk retrieval: 5-12 hours',
+                        'Expedited retrieval: 1-5 minutes',
+                        'Unlimited storage',
+                        'Vault lock for compliance',
+                        'Cross-region replication',
+                        'Automatic encryption'
+                    ]
+                },
+                url: 'aws.amazon.com/glacier/pricing/'
+            },
+            {
+                name: 'Azure Archive Storage',
+                type: 'Archival Storage',
+                hasFree: true,
+                starter: '$0.002/GB/month',
+                currency: 'USD',
+                freeTier: {
+                    available: true,
+                    name: 'Free Tier (12 months)',
+                    features: [
+                        '5 GB LRS storage',
+                        '20,000 read operations',
+                        '10,000 write operations',
+                        'Blob storage integration',
+                        'Lifecycle management',
+                        'First 12 months only'
+                    ],
+                    downsides: [
+                        'Only 12 months free (then charged)',
+                        'Retrieval times: up to 15 hours',
+                        'High priority retrieval: under 1 hour',
+                        'Minimum 180-day storage commitment',
+                        'Early deletion fees apply',
+                        'Requires Azure account'
+                    ]
+                },
+                paidTier: {
+                    name: 'Cool/Archive Tiers',
+                    features: [
+                        'Cool tier: $0.01/GB/month',
+                        'Archive tier: $0.002/GB/month',
+                        'Multiple retrieval options',
+                        'Geo-redundant options',
+                        'Immutable storage',
+                        'Azure integration',
+                        'WORM policies',
+                        'Encryption at rest'
+                    ]
+                },
+                url: 'azure.microsoft.com/pricing/details/storage/blobs/'
+            },
+            {
+                name: 'Google Cloud Archive',
+                type: 'Archival Storage',
+                hasFree: true,
+                starter: '$0.0012/GB/month',
+                currency: 'USD',
+                freeTier: {
+                    available: true,
+                    name: 'Always Free',
+                    features: [
+                        '5 GB storage (all classes)',
+                        '5,000 Class A operations',
+                        '50,000 Class B operations',
+                        '100 GB network egress',
+                        'Lifecycle policies',
+                        'Forever free (within limits)'
+                    ],
+                    downsides: [
+                        'Limited to 5 GB total (all storage)',
+                        'Retrieval times: hours to 12+ hours',
+                        'Early deletion fees (365 days minimum)',
+                        'Egress charges after 100 GB',
+                        'Regional restrictions apply',
+                        'Complex pricing for operations'
+                    ]
+                },
+                paidTier: {
+                    name: 'Archive Storage Class',
+                    features: [
+                        'Archive: $0.0012/GB/month (cheapest)',
+                        'Nearline: $0.01/GB/month (30-day min)',
+                        'Coldline: $0.004/GB/month (90-day min)',
+                        'Multi-region availability',
+                        'Object versioning',
+                        'Bucket lock',
+                        'Autoclass for cost optimization',
+                        'Integrated with Google Cloud'
+                    ]
+                },
+                url: 'cloud.google.com/storage/pricing'
+            },
+            {
+                name: 'Wasabi Hot Storage',
+                type: 'Archival Storage',
+                hasFree: true,
+                starter: '$6.99/TB/month',
+                currency: 'USD',
+                freeTier: {
+                    available: true,
+                    name: 'Trial',
+                    features: [
+                        '1 TB free for 30 days',
+                        'No egress fees',
+                        'No API fees',
+                        'S3 compatible',
+                        'Instant retrieval',
+                        '30 days only'
+                    ],
+                    downsides: [
+                        'Only 30 days free trial',
+                        'Minimum 90-day storage commitment',
+                        'Minimum 1 TB storage fee applies',
+                        'Early deletion fees',
+                        'Limited region availability',
+                        'Less features than AWS/Azure'
+                    ]
+                },
+                paidTier: {
+                    name: 'Hot Cloud Storage',
+                    features: [
+                        'Storage: $6.99/TB/month (flat rate)',
+                        'Equivalent: ~$0.0069/GB/month',
+                        'Egress: $0 (zero, unlimited)',
+                        'API requests: $0 (zero)',
+                        'Instant retrieval (not archival)',
+                        'S3 compatible API',
+                        'Immutable storage',
+                        '11 nines durability',
+                        'Simple pricing'
+                    ]
+                },
+                url: 'wasabi.com/cloud-storage-pricing/'
+            },
+            {
+                name: 'Cloudflare R2',
+                type: 'Archival Storage',
+                hasFree: true,
+                starter: '$0.015/GB/month',
+                currency: 'USD',
+                freeTier: {
+                    available: true,
+                    name: 'Free Tier',
+                    features: [
+                        '10 GB storage (forever free)',
+                        '10 million Class A ops/month',
+                        '100 million Class B ops/month',
+                        'Zero egress fees (forever)',
+                        'S3 compatible API',
+                        'Global edge network'
+                    ],
+                    downsides: [
+                        'Limited to 10 GB free storage',
+                        'Newer service (less mature)',
+                        'Limited geographic regions',
+                        'No archival tiers (hot storage only)',
+                        'Fewer features than AWS/Azure',
+                        'Requires Cloudflare account'
+                    ]
+                },
+                paidTier: {
+                    name: 'R2 Storage',
+                    features: [
+                        '$0.015/GB/month storage',
+                        'Zero egress fees (forever)',
+                        'No API call fees (Class B)',
+                        'S3 compatible',
+                        'Global distribution',
+                        'Automatic multi-region',
+                        'Fast retrieval',
+                        'Cloudflare integration'
+                    ]
+                },
+                url: 'cloudflare.com/products/r2/'
+            }
         ]
     };
 
     const filteredData = category === 'all'
-        ? [...data.domains, ...data.hosting, ...data.databases]
+        ? [...data.domains, ...data.hosting, ...data.databases, ...data.archival]
         : data[category as keyof typeof data] || [];
 
     return (
@@ -461,6 +723,7 @@ const ComparisonChart = () => {
                                 <option value="domains">Domain Registrars</option>
                                 <option value="hosting">Hosting Platforms</option>
                                 <option value="databases">Cloud Databases</option>
+                                <option value="archival">Archival Storage</option>
                             </select>
                         </div>
                     </div>
@@ -474,6 +737,7 @@ const ComparisonChart = () => {
                                             {service.type.includes('Domain') && <Globe className="text-green-600" size={24} />}
                                             {service.type.includes('Hosting') && <Server className="text-blue-600" size={24} />}
                                             {service.type.includes('Database') && <Database className="text-purple-600" size={24} />}
+                                            {service.type.includes('Archival') && <Archive className="text-orange-600" size={24} />}
                                             <h2 className="text-2xl font-bold text-gray-800">{service.name}</h2>
                                             <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
                                                 {service.type}
@@ -569,16 +833,19 @@ const ComparisonChart = () => {
                     <div className="mt-8 p-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl">
                         <h3 className="text-lg font-bold text-gray-800 mb-3">💡 Quick Recommendations</h3>
                         <div className="space-y-2 text-sm text-gray-700">
-                            <p><strong>Start Free:</strong> Vercel (hosting) + Supabase (database) - Both have generous free tiers</p>
-                            <p><strong>Budget Paid:</strong> Namecheap (domain $8-15) + Railway ($5-10) - Around $13-25/month total</p>
+                            <p><strong>Start Free:</strong> Vercel (hosting) + Supabase (database) + Backblaze B2 (storage) - All have generous free tiers</p>
+                            <p><strong>Budget Paid:</strong> Namecheap (domain $8-15) + Railway ($5-10) + Backblaze ($0.006/GB) - Around $13-25/month</p>
                             <p><strong>Professional:</strong> GoDaddy/Vodien (domain) + Vercel Pro + Supabase Pro - ~$65-75/month</p>
                             <p><strong>Scale-Ready:</strong> Railway or PlanetScale - Usage-based pricing grows with your needs</p>
+                            <p><strong>Archival Storage:</strong> Google Cloud Archive ($0.0012/GB) or Backblaze B2 ($0.006/GB) for cost-effective long-term storage</p>
+                            <p><strong>Zero Egress Fees:</strong> Cloudflare R2 or Wasabi - No charges for data downloads</p>
                         </div>
                     </div>
 
                     <div className="mt-6 text-center text-xs text-gray-500">
                         <p>Prices shown are approximate base prices. Actual costs vary based on usage and features.</p>
                         <p className="mt-1">Exchange rate: 1 USD ≈ 1.35 SGD (approximate)</p>
+                        <p className="mt-1">Archival storage pricing shown per GB/month unless otherwise noted. 1 TB = 1,000 GB.</p>
                     </div>
                 </div>
             </div>
